@@ -1,0 +1,13 @@
+{
+  "name": "gitops-playground-backend",
+  "version": "1.0.0",
+  "description": "Backend API for GitOps Playground",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.21.1",
+    "ioredis": "^5.4.1"
+  }
+}

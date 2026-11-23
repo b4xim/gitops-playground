@@ -1,0 +1,57 @@
+services:
+  frontend:
+    build:
+      context: ./app/frontend
+      dockerfile: Dockerfile
+    image: gitops-playground-frontend:v1.0.0
+    container_name: gitops-frontend
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - BACKEND_URL=http://backend:8080
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./app/backend
+      dockerfile: Dockerfile
+    image: gitops-playground-backend:v1.0.0
+    container_name: gitops-backend
+    ports:
+      - "8081:8080" # Exposed for direct API testing / probing
+    environment:
+      - PORT=8080
+      - APP_VERSION=v1.0.0
+      - APP_ENV=local
+      - THEME_COLOR=#2563eb
+      - WELCOME_MESSAGE=Welcome to GitOps Playground v1.0.0!
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      # - REDIS_PASSWORD=  # Optional for practicing secrets
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/readyz || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 3s
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: gitops-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 2s
+    restart: unless-stopped
