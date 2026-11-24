@@ -61,7 +61,12 @@ The UI provides instant visual feedback for GitOps actions: when you update a Gi
 │           ├── App.jsx            # Real-time rollout & observability dashboard
 │           ├── main.jsx
 │           └── index.css
-├── deploy/                        # Placeholder: write your K8s/Helm/Kustomize manifests here
+├── deploy/                        # Helm chart root (path: deploy for ArgoCD)
+│   ├── Chart.yaml
+│   ├── values.yaml
+│   ├── values-dev.yaml
+│   ├── values-prod.yaml
+│   ├── templates/
 │   └── README.md
 ├── docker-compose.yml             # Local multi-container testing stack
 ├── Makefile                       # Automated build, test, and tag targets

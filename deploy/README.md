@@ -1,72 +1,35 @@
-# Deploy Manifests & Helm Charts
+# Deploy Manifests (Helm Chart)
 
-This directory contains deployment definitions for the `gitops-playground` application.
+This directory is the root of the **GitOps Playground Helm Chart**. Because `Chart.yaml` is located directly in `deploy/`, you can point your ArgoCD Application path directly to `path: deploy`.
 
 ## Directory Structure
 
 ```text
 deploy/
-├── README.md
-└── helm/
-    └── gitops-playground/        # Complete Helm Chart
-        ├── Chart.yaml            # Metadata
-        ├── values.yaml           # Default values (v1.0.0, blue theme, 2 replicas)
-        ├── values-dev.yaml       # Development overlay (v1.1.0, green theme, 1 replica)
-        ├── values-prod.yaml      # Production overlay (v1.0.0, purple theme, 3 replicas)
-        └── templates/
-            ├── _helpers.tpl
-            ├── backend-deployment.yaml
-            ├── backend-service.yaml
-            ├── backend-configmap.yaml
-            ├── backend-secret.yaml
-            ├── frontend-deployment.yaml
-            ├── frontend-service.yaml
-            ├── redis-deployment.yaml
-            ├── redis-service.yaml
-            ├── ingress.yaml
-            └── NOTES.txt
+├── Chart.yaml            # Helm Chart metadata
+├── values.yaml           # Default values (v1.0.0, blue theme, 2 replicas)
+├── values-dev.yaml       # Development overlay (v1.1.0, green theme, 1 replica)
+├── values-prod.yaml      # Production overlay (v1.0.0, purple theme, 3 replicas)
+├── templates/            # Kubernetes manifest templates
+│   ├── _helpers.tpl
+│   ├── backend-deployment.yaml
+│   ├── backend-service.yaml
+│   ├── backend-configmap.yaml
+│   ├── backend-secret.yaml
+│   ├── frontend-deployment.yaml
+│   ├── frontend-service.yaml
+│   ├── redis-deployment.yaml
+│   ├── redis-service.yaml
+│   ├── ingress.yaml
+│   └── NOTES.txt
+└── README.md
 ```
 
 ---
 
-## Testing & Linting the Chart
+## ArgoCD Application Definition
 
-To lint the chart:
-
-```bash
-helm lint deploy/helm/gitops-playground
-```
-
-To render templates locally without installing:
-
-```bash
-# Render default templates
-helm template playground deploy/helm/gitops-playground
-
-# Render with development values overlay
-helm template playground-dev deploy/helm/gitops-playground -f deploy/helm/gitops-playground/values-dev.yaml
-
-# Render with production values overlay
-helm template playground-prod deploy/helm/gitops-playground -f deploy/helm/gitops-playground/values-prod.yaml
-```
-
----
-
-## Installing Directly with Helm
-
-```bash
-# Install with default values
-helm install gitops-playground deploy/helm/gitops-playground
-
-# Or install for a specific environment
-helm install gitops-playground-dev deploy/helm/gitops-playground -f deploy/helm/gitops-playground/values-dev.yaml
-```
-
----
-
-## Deploying with ArgoCD
-
-You can create an ArgoCD `Application` pointing to this Helm chart:
+With `Chart.yaml` directly in `deploy/`, set `path: deploy`:
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
@@ -79,11 +42,11 @@ spec:
   source:
     repoURL: https://github.com/<your-username>/gitops-playground.git
     targetRevision: HEAD
-    path: deploy/helm/gitops-playground
+    path: deploy
     helm:
       valueFiles:
         - values.yaml
-        # - values-dev.yaml   # Swap or override for multi-environment GitOps
+        # - values-dev.yaml # Uncomment for dev environment testing
   destination:
     server: https://kubernetes.default.svc
     namespace: default
@@ -93,4 +56,19 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+```
+
+---
+
+## Local Helm Commands
+
+```bash
+# Lint the chart in deploy/
+helm lint deploy
+
+# Render templates locally
+helm template playground deploy
+
+# Render with dev overlay
+helm template playground deploy -f deploy/values-dev.yaml
 ```
