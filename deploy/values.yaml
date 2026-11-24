@@ -6,8 +6,8 @@ fullnameOverride: ""
 backend:
   replicaCount: 2
   image:
-    repository: gitops-playground-backend
-    pullPolicy: IfNotPresent
+    repository: b4xim/gitops-playground-backend
+    pullPolicy: Always
     tag: "v1.0.0"
   service:
     type: ClusterIP
@@ -41,8 +41,8 @@ backend:
 frontend:
   replicaCount: 2
   image:
-    repository: gitops-playground-frontend
-    pullPolicy: IfNotPresent
+    repository: b4xim/gitops-playground-frontend
+    pullPolicy: Always
     tag: "v1.0.0"
   service:
     type: NodePort
