@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "gitops-playground.fullname" . }}-frontend
+  labels:
+    {{- include "gitops-playground.frontendSelectorLabels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.frontend.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "gitops-playground.frontendSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "gitops-playground.frontendSelectorLabels" . | nindent 8 }}
+    spec:
+      securityContext:
+        {{- toYaml .Values.frontend.securityContext | nindent 8 }}
+      containers:
+        - name: frontend
+          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.frontend.service.port }}
+              protocol: TCP
+          env:
+            - name: PORT
+              value: {{ .Values.frontend.service.port | quote }}
+            - name: BACKEND_URL
+              value: "http://{{ include "gitops-playground.fullname" . }}-backend:{{ .Values.backend.service.port }}"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.frontend.resources | nindent 12 }}

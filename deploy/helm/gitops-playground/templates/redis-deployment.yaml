@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "gitops-playground.fullname" . }}-redis
+  labels:
+    {{- include "gitops-playground.redisSelectorLabels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "gitops-playground.redisSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "gitops-playground.redisSelectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: redis
+          image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
+          imagePullPolicy: {{ .Values.redis.image.pullPolicy }}
+          ports:
+            - name: redis
+              containerPort: {{ .Values.redis.service.port }}
+              protocol: TCP
+          {{- if .Values.redis.auth.enabled }}
+          args:
+            - "--requirepass"
+            - "$(REDIS_PASSWORD)"
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "gitops-playground.fullname" . }}-redis-secret
+                  key: REDIS_PASSWORD
+          {{- end }}
+          livenessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.redis.resources | nindent 12 }}

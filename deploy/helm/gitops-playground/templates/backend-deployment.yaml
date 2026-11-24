@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "gitops-playground.fullname" . }}-backend
+  labels:
+    {{- include "gitops-playground.backendSelectorLabels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "gitops-playground.backendSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "gitops-playground.backendSelectorLabels" . | nindent 8 }}
+    spec:
+      securityContext:
+        {{- toYaml .Values.backend.securityContext | nindent 8 }}
+      containers:
+        - name: backend
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.backend.service.port }}
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ include "gitops-playground.fullname" . }}-backend-config
+          {{- if .Values.redis.auth.enabled }}
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "gitops-playground.fullname" . }}-redis-secret
+                  key: REDIS_PASSWORD
+          {{- end }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.backend.probes.liveness.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.backend.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.backend.probes.liveness.periodSeconds }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.backend.probes.readiness.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.backend.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.backend.probes.readiness.periodSeconds }}
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}

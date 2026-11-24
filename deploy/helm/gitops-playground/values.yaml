@@ -1,0 +1,92 @@
+# Global Settings
+nameOverride: ""
+fullnameOverride: ""
+
+# Backend Component
+backend:
+  replicaCount: 2
+  image:
+    repository: gitops-playground-backend
+    pullPolicy: IfNotPresent
+    tag: "v1.0.0"
+  service:
+    type: ClusterIP
+    port: 8080
+  config:
+    appVersion: "v1.0.0"
+    appEnv: "production"
+    themeColor: "#2563eb"
+    welcomeMessage: "Welcome to GitOps Playground on Kubernetes!"
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+  probes:
+    liveness:
+      path: /healthz
+      initialDelaySeconds: 5
+      periodSeconds: 10
+    readiness:
+      path: /readyz
+      initialDelaySeconds: 5
+      periodSeconds: 5
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+
+# Frontend Component
+frontend:
+  replicaCount: 2
+  image:
+    repository: gitops-playground-frontend
+    pullPolicy: IfNotPresent
+    tag: "v1.0.0"
+  service:
+    type: NodePort
+    port: 8080
+    nodePort: 30080
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 25m
+      memory: 32Mi
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 101
+
+# Redis Component
+redis:
+  image:
+    repository: redis
+    pullPolicy: IfNotPresent
+    tag: "7-alpine"
+  service:
+    type: ClusterIP
+    port: 6379
+  auth:
+    enabled: false
+    password: ""
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 25m
+      memory: 32Mi
+
+# Ingress Configuration (Optional)
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: playground.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []

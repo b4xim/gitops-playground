@@ -1,0 +1,15 @@
+# Values override for Development environment
+backend:
+  replicaCount: 1
+  image:
+    tag: "v1.1.0"
+  config:
+    appVersion: "v1.1.0"
+    appEnv: "development"
+    themeColor: "#10b981" # Emerald Green
+    welcomeMessage: "Hello from DEV environment! (Sync test)"
+
+frontend:
+  replicaCount: 1
+  image:
+    tag: "v1.1.0"

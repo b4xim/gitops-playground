@@ -1,0 +1,13 @@
+apiVersion: v2
+name: gitops-playground
+description: A Helm chart for deploying the GitOps Playground multi-tier demo app on Kubernetes with ArgoCD
+type: application
+version: 1.0.0
+appVersion: "v1.0.0"
+keywords:
+  - gitops
+  - argocd
+  - kubernetes
+  - demo
+maintainers:
+  - name: GitOps Playground Maintainers

@@ -1,0 +1,19 @@
+GitOps Playground has been deployed! 🐙
+
+Access the Dashboard:
+{{- if contains "NodePort" .Values.frontend.service.type }}
+  Export the Node Port:
+    export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "gitops-playground.fullname" . }}-frontend)
+    export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+    echo "Visit: http://$NODE_IP:$NODE_PORT"
+{{- else if contains "LoadBalancer" .Values.frontend.service.type }}
+  Watch for LoadBalancer Ingress:
+    kubectl get svc --namespace {{ .Release.Namespace }} -w {{ include "gitops-playground.fullname" . }}-frontend
+{{- else if .Values.ingress.enabled }}
+  Access via Ingress Host:
+    http://{{ (index .Values.ingress.hosts 0).host }}
+{{- else }}
+  Port-forward the frontend:
+    kubectl port-forward svc/{{ include "gitops-playground.fullname" . }}-frontend 8080:8080
+    echo "Visit: http://localhost:8080"
+{{- end }}

@@ -1,0 +1,15 @@
+# Values override for Production environment
+backend:
+  replicaCount: 3
+  image:
+    tag: "v1.0.0"
+  config:
+    appVersion: "v1.0.0"
+    appEnv: "production"
+    themeColor: "#8b5cf6" # Royal Purple
+    welcomeMessage: "GitOps Playground - Production Tier"
+
+frontend:
+  replicaCount: 3
+  image:
+    tag: "v1.0.0"
